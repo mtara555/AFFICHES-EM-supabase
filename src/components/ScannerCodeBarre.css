@@ -1,0 +1,121 @@
+.scanner {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #05081a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family: var(--font-ui);
+}
+
+.scanner__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Cadre de visee : format d'un code EAN, assombrit le reste de l'image. */
+.scanner__cadre {
+  position: relative;
+  width: min(80vw, 420px);
+  aspect-ratio: 2 / 1;
+  border: 3px solid #ffe924;
+  border-radius: 12px;
+  box-shadow: 0 0 0 100vmax rgba(5, 8, 26, 0.55);
+  overflow: hidden;
+}
+
+.scanner__ligne {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 50%;
+  height: 2px;
+  background: #e30613;
+  box-shadow: 0 0 8px #e30613;
+  animation: scanner-balayage 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes scanner-balayage {
+  from {
+    top: 15%;
+  }
+  to {
+    top: 85%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanner__ligne {
+    animation: none;
+  }
+}
+
+.scanner__aide {
+  position: relative;
+  margin: 20px 16px 0;
+  max-width: 420px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.scanner__actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.scanner__bouton {
+  min-width: 120px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(5, 8, 26, 0.6);
+  color: #ffffff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scanner__bouton[aria-pressed='true'] {
+  background: #ffe924;
+  color: #05081a;
+  border-color: #ffe924;
+}
+
+.scanner__bouton--fermer {
+  background: #ffffff;
+  color: #05081a;
+  border-color: #ffffff;
+}
+
+.scanner__bouton:focus-visible {
+  outline: 3px solid #ffe924;
+  outline-offset: 2px;
+}
+
+/* Bouton d'ouverture dans la saisie */
+.bouton--scanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bouton--scanner svg {
+  width: 18px;
+  height: 18px;
+}

@@ -1,0 +1,88 @@
+name: Deploiement GitHub Pages
+
+# Se declenche a chaque envoi de code sur la branche principale,
+# et peut aussi etre lance manuellement depuis l'onglet Actions.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Permissions minimales necessaires a la publication sur Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication a la fois. Les executions en attente sont annulees,
+# mais une publication en cours va toujours a son terme.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Compilation
+  # ---------------------------------------------------------------------------
+  build:
+    name: Compilation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperation du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installation des dependances
+        run: npm ci
+
+      - name: Verification des types
+        run: npm run typecheck
+
+      - name: Compilation
+        # Vite inscrit les variables VITE_* dans le code AU MOMENT de la
+        # compilation : elles doivent donc etre presentes ici, et pas seulement
+        # dans le fichier .env.local du poste de developpement.
+        #
+        # Ces valeurs sont declarees en "Variables" (et non en "Secrets") du
+        # depot, car elles sont publiques par conception : l'URL du projet et la
+        # cle « anon » figurent dans le code de toute application Supabase. La
+        # securite repose sur les regles RLS de la base, jamais sur leur
+        # confidentialite. NE JAMAIS y mettre la cle service_role.
+        run: npm run build
+        env:
+          # GitHub Pages sert le site depuis /<nom-du-depot>/ et non depuis la
+          # racine. Le nom du depot est lu automatiquement : renommer le depot
+          # ne cassera pas le deploiement.
+          BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Configuration de Pages
+        uses: actions/configure-pages@v5
+
+      - name: Envoi du resultat
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # ---------------------------------------------------------------------------
+  # 2. Publication
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Publication
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Publication sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

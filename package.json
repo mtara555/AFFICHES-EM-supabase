@@ -1,0 +1,33 @@
+{
+  "name": "affiches-em",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AFFICHES-EM v1.0 — Generateur d'affiches prix pour le departement Electromenager",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "migrer:export": "node scripts/migrer-appwrite-vers-supabase.mjs export",
+    "migrer:import": "node scripts/migrer-appwrite-vers-supabase.mjs import"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "@zxing/browser": "^0.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.2",
+    "node-appwrite": "^29.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9",
+    "vite-plugin-pwa": "^0.20.5"
+  }
+}

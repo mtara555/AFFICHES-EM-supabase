@@ -1,0 +1,220 @@
+/* ==========================================================================
+   AFFICHES-EM v1.0 — Adaptation telephone et tablette
+   --------------------------------------------------------------------------
+   Charge en dernier (main.tsx) : ces regles priment sur celles des pages.
+   ========================================================================== */
+
+/* --- Tablette et telephone : menu en bandeau ---------------------------- */
+@media (max-width: 860px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+  }
+
+  .shell__sidebar {
+    position: static;
+    height: auto;
+    display: grid;
+    align-content: start;
+    align-items: center;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'marque compte'
+      'menu menu';
+    border-right: 0;
+    overflow: visible;
+  }
+
+  .shell__brand {
+    grid-area: marque;
+    border-bottom: 0;
+    padding: 10px 16px;
+  }
+
+  .shell__compte {
+    grid-area: compte;
+    border-top: 0;
+    padding: 10px 16px;
+  }
+
+  .shell__compte-infos {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  /* Menu sur une ligne, que l'on fait defiler du doigt. */
+  .shell__nav {
+    grid-area: menu;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 0 8px 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shell__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shell__nav-link {
+    flex: none;
+    white-space: nowrap;
+    padding: 8px 12px;
+    min-height: 40px;
+  }
+
+  .shell__nav-link--active {
+    box-shadow: inset 0 -2px 0 var(--brand-yellow);
+  }
+
+  .shell__nav-badge,
+  .shell__sidebar-foot {
+    display: none;
+  }
+
+  /* En-tete de page : titre puis boutons en dessous. */
+  .shell__topbar {
+    position: static;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .shell__titles {
+    flex: 1 1 100%;
+  }
+
+  .shell__actions {
+    margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .shell__actions > .bouton,
+  .shell__actions > a.bouton {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .shell__content {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  .carte {
+    padding: var(--space-4);
+  }
+}
+
+/* --- Telephone ------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .shell__compte-infos {
+    display: none;
+  }
+
+  /* Boutons et champs faciles a toucher. */
+  .bouton {
+    min-height: 40px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* evite le zoom automatique de Safari iOS */
+  }
+
+  /* En-tetes de carte : titre puis actions. */
+  .carte__entete {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .carte__entete .recherche,
+  .carte__entete input[type='search'] {
+    width: 100%;
+  }
+
+  /* Tableaux : une fiche par ligne, chaque valeur precedee de son titre. */
+  table.tableau,
+  .tableau tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .tableau thead {
+    display: none;
+  }
+
+  .tableau tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tableau tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .tableau tbody td,
+  .tableau tbody th {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* L'identifiant de la ligne (code, nom) sert de titre de fiche. */
+  .tableau tbody th[scope='row'] {
+    grid-column: 1 / -1;
+    font-size: var(--text-base);
+  }
+
+  .tableau tbody td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* Boutons d'action : sur toute la largeur, sans titre. */
+  .tableau tbody td.colonne-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tableau tbody td.colonne-actions::before {
+    display: none;
+  }
+
+  .tableau tbody td.colonne-actions > * {
+    flex: 1 1 auto;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .colonne-actions .bouton + .bouton {
+    margin-left: 0;
+  }
+
+  /* Zone d'apercu des affiches : pas de debordement horizontal. */
+  .impression-apercu {
+    justify-content: center;
+  }
+}

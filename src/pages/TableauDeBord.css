@@ -1,0 +1,292 @@
+.carte {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.carte__titre {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  margin-bottom: var(--space-4);
+}
+
+.carte__texte {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.carte__texte + .carte__texte {
+  margin-top: var(--space-2);
+}
+
+.carte__texte--discret {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+.carte code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+}
+
+/* --------------------------------------------------------------------------
+   Verification de configuration
+   -------------------------------------------------------------------------- */
+
+.carte--verification.est-attente {
+  border-left: 3px solid var(--brand-yellow);
+}
+
+.carte--verification.est-ok {
+  border-left: 3px solid var(--ok);
+}
+
+/* --------------------------------------------------------------------------
+   Liste des etapes
+   -------------------------------------------------------------------------- */
+
+.etapes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.etape {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.etape__code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--ink-faint);
+  min-width: 26px;
+}
+
+.etape__libelle {
+  flex: 1;
+  min-width: 0;
+}
+
+.etape__etat {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.etape--fait {
+  background: rgba(26, 143, 94, 0.06);
+}
+
+.etape--fait .etape__etat {
+  background: rgba(26, 143, 94, 0.12);
+  color: var(--ok);
+}
+
+.etape--en-cours {
+  background: rgba(242, 183, 5, 0.08);
+}
+
+.etape--en-cours .etape__etat {
+  background: rgba(242, 183, 5, 0.18);
+  color: var(--warn);
+}
+
+.etape--a-venir {
+  color: var(--ink-faint);
+}
+
+.etape--a-venir .etape__etat {
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Tableau
+   -------------------------------------------------------------------------- */
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.tableau th,
+.tableau td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.tableau thead th {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.tableau tbody th {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-bold);
+  color: var(--brand-blue);
+}
+
+.tableau tbody tr:last-child th,
+.tableau tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.carte--session {
+  border-left: 3px solid var(--ok);
+}
+
+/* --------------------------------------------------------------------------
+   Statistiques
+   -------------------------------------------------------------------------- */
+
+.tuiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.tuile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.tuile__libelle {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.tuile__valeur {
+  font-size: 2rem;
+  font-weight: var(--weight-semibold);
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.tuile__detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+.tuile__detail i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+
+.tuile__detail i:first-child {
+  margin-left: 0;
+}
+
+.carte__entete-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.carte__entete-stats .carte__titre {
+  margin-bottom: var(--space-1);
+}
+
+.segments {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.segments__bouton {
+  border: 0;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.segments__bouton:hover {
+  color: var(--ink);
+}
+
+.segments__bouton.est-actif {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+  box-shadow: 0 1px 2px rgba(14, 19, 48, 0.12);
+}
+
+.segments__bouton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.carte .legende {
+  margin-bottom: var(--space-2);
+}
+
+.carte .graphique {
+  margin-bottom: var(--space-3);
+}
+
+.tableau-defilant {
+  overflow-x: auto;
+  margin-top: var(--space-3);
+}
+
+.tableau--stats td,
+.tableau--stats th {
+  font-variant-numeric: tabular-nums;
+}
+
+.tableau--stats th[scope='row'] {
+  font-weight: var(--weight-normal);
+  text-transform: capitalize;
+}
+
+.bouton--espace {
+  margin-top: var(--space-3);
+}

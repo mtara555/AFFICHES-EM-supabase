@@ -1,0 +1,26 @@
+@import './Marques.css';
+
+.lien-campagne {
+  color: var(--brand-blue);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.lien-campagne:hover {
+  text-decoration: underline;
+}
+
+.statut-select {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: var(--text-xs);
+  background: var(--surface-sunken);
+}
+
+.colonne-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}

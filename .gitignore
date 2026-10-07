@@ -1,0 +1,23 @@
+node_modules/
+dist/
+dist-ssr/
+
+.env
+.env.local
+.env.*.local
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+.DS_Store
+Thumbs.db
+
+*.log
+npm-debug.log*
+
+*.tsbuildinfo
+
+# Migration Appwrite -> Supabase (donnees et mots de passe temporaires : ne jamais versionner)
+export-appwrite/
+utilisateurs-migres.csv

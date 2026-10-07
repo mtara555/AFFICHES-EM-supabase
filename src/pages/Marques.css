@@ -1,0 +1,300 @@
+/* Reprend les classes .carte, .carte__titre, .carte__texte et .tableau
+   definies dans TableauDeBord.css, importe globalement par cette page. */
+
+@import './TableauDeBord.css';
+
+/* --------------------------------------------------------------------------
+   Bandeaux de retour
+   -------------------------------------------------------------------------- */
+
+.bandeau {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+  line-height: 1.5;
+}
+
+.bandeau--erreur {
+  background: rgba(200, 16, 46, 0.07);
+  border-left: 3px solid var(--danger);
+  color: var(--danger);
+}
+
+.bandeau--succes {
+  background: rgba(26, 143, 94, 0.07);
+  border-left: 3px solid var(--ok);
+  color: var(--ok);
+}
+
+/* --------------------------------------------------------------------------
+   Carte d'import
+   -------------------------------------------------------------------------- */
+
+.carte--import {
+  border-left: 3px solid var(--brand-yellow);
+}
+
+.carte--import .bouton {
+  margin-top: var(--space-4);
+}
+
+.carte__entete {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.carte__entete .carte__titre {
+  margin-bottom: 0;
+}
+
+.progression {
+  position: relative;
+  margin-top: var(--space-4);
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.progression__barre {
+  height: 100%;
+  background: var(--brand-blue);
+  transition: width 120ms linear;
+}
+
+.progression__texte {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink);
+}
+
+/* --------------------------------------------------------------------------
+   Formulaire
+   -------------------------------------------------------------------------- */
+
+.formulaire-ligne {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.champ--extensible {
+  flex: 1;
+  min-width: 200px;
+}
+
+.case {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  padding-bottom: 10px;
+  white-space: nowrap;
+}
+
+.case input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand-blue);
+}
+
+.recherche {
+  margin-left: auto;
+  min-width: 200px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 7px 11px;
+  font-size: var(--text-sm);
+  background: var(--surface-sunken);
+}
+
+.recherche:focus {
+  border-color: var(--brand-blue);
+  background: var(--surface);
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   Boutons
+   -------------------------------------------------------------------------- */
+
+.bouton {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  transition: background var(--duration) var(--ease), color var(--duration) var(--ease);
+  white-space: nowrap;
+}
+
+.bouton--petit {
+  padding: 5px 10px;
+  font-size: var(--text-xs);
+}
+
+.bouton--principal {
+  background: var(--brand-blue);
+  color: var(--ink-inverse);
+}
+
+.bouton--principal:hover:not(:disabled) {
+  background: var(--brand-blue-deep);
+}
+
+.bouton--discret {
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+}
+
+.bouton--discret:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.bouton--danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--line);
+}
+
+.bouton--danger:hover:not(:disabled) {
+  background: rgba(200, 16, 46, 0.07);
+  border-color: var(--danger);
+}
+
+.bouton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Tableau des marques
+   -------------------------------------------------------------------------- */
+
+.tableau--marques tbody th {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.tableau--marques tr.est-editee {
+  background: rgba(21, 43, 122, 0.05);
+}
+
+.colonne-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.colonne-actions .bouton + .bouton {
+  margin-left: var(--space-2);
+}
+
+.etiquette {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+}
+
+.etiquette--ok {
+  background: rgba(26, 143, 94, 0.12);
+  color: var(--ok);
+}
+
+.etiquette--inactive {
+  background: rgba(200, 16, 46, 0.09);
+  color: var(--danger);
+}
+
+/* Un lien stylise en bouton doit rester lisible et aligne. */
+a.bouton {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   Logos
+   -------------------------------------------------------------------------- */
+
+.cellule-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.vignette-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 40px;
+  padding: 3px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  flex: none;
+  overflow: hidden;
+}
+
+.vignette-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.vignette-logo__vide {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+label.bouton {
+  cursor: pointer;
+}
+
+label.bouton.est-desactive {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+label.bouton:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.tableau--lot select {
+  max-width: 220px;
+  padding: 5px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--text-sm);
+  background: var(--surface);
+}
+
+.colonne-fichier {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  word-break: break-all;
+}
+
+.tableau-defilant {
+  overflow-x: auto;
+}

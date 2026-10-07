@@ -1,0 +1,149 @@
+.graphique {
+  position: relative;
+  width: 100%;
+}
+
+.graphique svg {
+  display: block;
+}
+
+.graphique__grille {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.graphique__base {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.graphique__axe {
+  fill: var(--ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.graphique__col--attenue {
+  opacity: 0.45;
+}
+
+.graphique rect[tabindex]:focus {
+  outline: none;
+}
+
+.graphique rect[tabindex]:focus-visible {
+  stroke: var(--focus);
+  stroke-width: 2;
+}
+
+.graphique__infobulle {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 170px;
+  padding: 8px 10px;
+  background: var(--panel);
+  color: var(--ink-inverse);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  box-shadow: 0 4px 14px rgba(14, 19, 48, 0.25);
+  white-space: nowrap;
+}
+
+.graphique__infobulle strong {
+  font-weight: var(--weight-semibold);
+  margin-bottom: 2px;
+}
+
+.graphique__infobulle span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.graphique__infobulle b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.graphique__infobulle i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.graphique__infobulle-total {
+  border-top: 1px solid var(--line-panel);
+  padding-top: 3px;
+  color: var(--ink-inverse-soft);
+}
+
+/* --- Legende ----------------------------------------------------------- */
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legende i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* --- Barres horizontales (articles par marque) ------------------------- */
+.barres {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.barres li {
+  display: grid;
+  grid-template-columns: minmax(90px, 150px) 1fr 48px;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.barres__nom {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barres__piste {
+  height: 12px;
+}
+
+.barres__remplissage {
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: #1f5bb5;
+}
+
+.barres__reste {
+  margin-top: var(--space-3);
+}
+
+.barres__valeur {
+  text-align: right;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}

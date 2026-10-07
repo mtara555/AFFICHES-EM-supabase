@@ -1,0 +1,40 @@
+/* Feuille A4 imprimee. Le centrage absorbe l'arrondi des formats A (ex. A7 :
+   2 × 104,7 mm sur 210 mm). */
+.planche {
+  width: 210mm;
+  height: 297mm;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  background: #ffffff;
+  overflow: hidden;
+  break-after: page;
+  page-break-after: always;
+}
+
+.planche:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+.planche__emplacement {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reperes de coupe discrets entre emplacements (formats reduits seulement). */
+.planche--A5 .planche__emplacement,
+.planche--A6 .planche__emplacement,
+.planche--A7 .planche__emplacement {
+  outline: 0.1mm dashed #c8c8c8;
+  outline-offset: -0.05mm;
+}
+
+.planche__affiche {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 210mm;
+  height: 297mm;
+  transform-origin: 0 0;
+}

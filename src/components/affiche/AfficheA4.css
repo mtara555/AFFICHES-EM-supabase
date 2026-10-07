@@ -1,0 +1,329 @@
+/* ==========================================================================
+   AFFICHES-EM v1.0 — Gabarit d'affiche A4
+   --------------------------------------------------------------------------
+   Toutes les dimensions sont en millimetres et en points, unites du modele
+   PowerPoint : l'affiche est imprimee a l'echelle 1, sans conversion.
+
+   Polices : « BF Marjane Black » et « BF Marjane Medium », les polices du
+   modele, sont embarquees dans l'application (src/assets/fonts, format
+   WOFF2). Elles s'affichent donc sur tous les postes, sans installation, et
+   restent disponibles hors ligne grace au cache de la PWA. Si elles sont deja
+   installees sur le poste, la version locale est utilisee en priorite.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Affiche Forte';
+  src:
+    local('BF Marjane Black'),
+    local('BFMarjane-Black'),
+    url('../../assets/fonts/BFMarjane-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Affiche Texte';
+  src:
+    local('BF Marjane Medium'),
+    local('BFMarjane-Medium'),
+    url('../../assets/fonts/BFMarjane-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+
+.affiche {
+  --affiche-bleu: #004497;
+  --affiche-jaune: #ffff00;
+  --affiche-orange: #ffc000;
+  --affiche-rouge: #ff0000;
+  --affiche-police-forte: 'Affiche Forte', 'Arial Black', 'Segoe UI Black', 'Helvetica Neue',
+    Arial, sans-serif;
+  --affiche-police-texte: 'Affiche Texte', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --ombre-jaune: 0 0.5mm 0.8mm rgba(110, 116, 122, 0.43);
+
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  background: #ffffff;
+  color: var(--affiche-bleu);
+  font-family: var(--affiche-police-forte);
+  font-weight: 900;
+  line-height: 1;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.affiche,
+.affiche * {
+  box-sizing: border-box;
+}
+
+.affiche > * {
+  position: absolute;
+}
+
+/* --- Cadre decoratif (Image 12), au-dessus de tout --------------------- */
+.affiche__cadre {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.affiche__cadre--dessous {
+  z-index: 0;
+}
+
+.affiche__image {
+  object-fit: fill;
+}
+
+/* --- Logo de la marque ---------------------------------------------------- */
+.affiche__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.affiche__logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.affiche__logo-texte {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+/* --- Designation et reference -------------------------------------------- */
+.affiche__designation,
+.affiche__reference {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.27mm 2.54mm;
+  text-align: center;
+  color: var(--affiche-bleu);
+}
+
+.affiche__designation,
+.affiche__reference {
+  line-height: 1.05;
+}
+
+.affiche__designation {
+  font-family: var(--affiche-police-forte);
+  font-weight: 900;
+}
+
+.affiche__reference {
+  font-family: var(--affiche-police-texte);
+  font-weight: 500;
+}
+
+/* --- Pictogrammes --------------------------------------------------------- */
+.affiche__picto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.affiche__picto-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.affiche__picto-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.affiche__garantie {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+
+.affiche__hexagone {
+  width: 100%;
+  height: 100%;
+  background: #ffe924;
+  clip-path: polygon(22% 0, 78% 0, 100% 50%, 78% 100%, 22% 100%, 0 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.affiche__hexagone-texte {
+  width: 66%;
+  height: 76%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #1453a2;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+/* --- Badges commerciaux (Rectangle 6) ------------------------------------ */
+.affiche__badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5mm;
+  z-index: 11;
+}
+
+/* Une case par badge : une colonne jusqu'a 2 badges, deux colonnes au-dela. */
+.affiche__badges--colonne,
+.affiche__badges--grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(0, 1fr);
+  place-items: center end;
+}
+
+.affiche__badges--grille {
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+}
+
+.affiche__badge-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  object-position: right center;
+}
+
+.affiche__badges--grille .affiche__badge-image {
+  object-position: center;
+}
+
+.affiche__badge {
+  display: inline-block;
+  padding: 1.6mm 2.6mm;
+  border-radius: 1.6mm;
+  background: #e30613;
+  color: #ffffff;
+  font-size: 11pt;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-4deg);
+  box-shadow: 0 0.6mm 1.2mm rgba(0, 0, 0, 0.25);
+}
+
+/* --- Bloc prix (Rectangle 124, 27, 24, Connecteur 6) ---------------------- */
+.affiche__bloc-prix {
+  background: var(--affiche-bleu);
+}
+
+.affiche__prix-barre {
+  background: var(--affiche-bleu);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 1.27mm 2.54mm;
+  white-space: nowrap;
+}
+
+.affiche__prix-barre-montant {
+  line-height: 1;
+}
+
+.affiche__prix-barre-entier {
+  position: relative;
+  font-size: 40pt;
+}
+
+/* Trait oblique orange, du coin bas-gauche au coin haut-droit du montant. */
+.affiche__prix-barre-entier::after {
+  content: '';
+  position: absolute;
+  left: -1mm;
+  right: -1mm;
+  top: 8%;
+  bottom: 8%;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.75mm),
+    var(--affiche-orange) calc(50% - 0.75mm),
+    var(--affiche-orange) calc(50% + 0.75mm),
+    transparent calc(50% + 0.75mm)
+  );
+}
+
+.affiche__prix-barre-reste {
+  font-size: 20pt;
+}
+
+.affiche__prix-principal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.27mm 2.54mm;
+  color: #ffffff;
+  text-shadow: 0.35mm 0.35mm 0.9mm rgba(0, 0, 0, 0.4);
+}
+
+.affiche__prix-entier {
+  font-size: 1em;
+}
+
+.affiche__prix-reste {
+  font-size: 0.4em;
+}
+
+/* --- Bandeau economie (Organigramme1, Rectangle 25 et 26) ----------------- */
+.affiche__economie {
+  background: var(--affiche-rouge);
+  clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%);
+}
+
+.affiche__economie-texte,
+.affiche__economie-arabe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--affiche-jaune);
+  text-shadow: var(--ombre-jaune);
+}
+
+.affiche__economie-arabe {
+  font-size: 36pt;
+  font-family: 'Affiche Forte', 'Segoe UI', 'Arial', sans-serif;
+}
+
+/* --- Credit 0 % (Image 22, Rectangle 23 et 28) ---------------------------- */
+.affiche__mensualite,
+.affiche__duree {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--affiche-jaune);
+  text-shadow: var(--ombre-jaune);
+  white-space: nowrap;
+}
+
+.affiche__mensualite-reste {
+  font-size: 0.4667em; /* 14 pt pour 30 pt */
+}
+
+.affiche__duree {
+  font-size: 16pt;
+}

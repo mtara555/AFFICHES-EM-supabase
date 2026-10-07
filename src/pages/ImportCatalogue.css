@@ -1,0 +1,156 @@
+@import './Catalogue.css';
+
+/* --------------------------------------------------------------------------
+   Zone de depot du fichier
+   -------------------------------------------------------------------------- */
+
+.depot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  margin-top: var(--space-4);
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+
+.depot:hover {
+  border-color: var(--brand-blue);
+  background: var(--surface);
+}
+
+.depot svg {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  color: var(--ink-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Chiffres du rapport
+   -------------------------------------------------------------------------- */
+
+.chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.chiffre {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+}
+
+.chiffre--ok {
+  background: rgba(26, 143, 94, 0.07);
+  border-color: rgba(26, 143, 94, 0.25);
+}
+
+.chiffre__valeur {
+  font-size: 1.5rem;
+  font-weight: var(--weight-bold);
+  font-family: var(--font-mono);
+  line-height: 1.1;
+}
+
+.chiffre--ok .chiffre__valeur {
+  color: var(--ok);
+}
+
+.chiffre__libelle {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Sections depliables
+   -------------------------------------------------------------------------- */
+
+.detail {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-2);
+  background: var(--surface-sunken);
+}
+
+.detail--alerte {
+  border-left: 3px solid var(--warn);
+}
+
+.detail summary {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.detail summary:hover {
+  color: var(--ink);
+}
+
+.detail__note {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  line-height: 1.6;
+  margin-top: var(--space-3);
+}
+
+.liste-detail {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-5);
+  font-size: var(--text-xs);
+  line-height: 1.8;
+  color: var(--ink-soft);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.liste-detail code {
+  font-family: var(--font-mono);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0 4px;
+}
+
+.liste-detail__reste {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Options d'import
+   -------------------------------------------------------------------------- */
+
+.options-import {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.import-suivi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.import-suivi .champ__aide {
+  margin: 0;
+}

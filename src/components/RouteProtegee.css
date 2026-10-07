@@ -1,0 +1,60 @@
+.chargement {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-4);
+  color: var(--ink-faint);
+  font-size: var(--text-sm);
+  background: var(--app-bg);
+}
+
+.chargement__indicateur {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid var(--line-strong);
+  border-top-color: var(--brand-blue);
+  animation: rotation 700ms linear infinite;
+}
+
+@keyframes rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chargement__indicateur {
+    animation-duration: 2s;
+  }
+}
+
+.acces-refuse {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--app-bg);
+}
+
+.acces-refuse__carte {
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--brand-yellow);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-6);
+}
+
+.acces-refuse__carte h1 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-3);
+}
+
+.acces-refuse__carte p {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
