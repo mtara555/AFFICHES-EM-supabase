@@ -24,6 +24,7 @@ import { useAuth } from '../context/AuthContext';
 import { DetailDemande } from '../components/DetailDemande';
 import { ChampDesignationArabe } from '../components/ChampDesignationArabe';
 import { validerArabe } from '../lib/designations-arabes';
+import { exporterCatalogue } from '../lib/export-catalogue';
 import {
   cloturerDemande,
   envoyerDemande,
@@ -85,6 +86,7 @@ export function Catalogue() {
   const [saisie, setSaisie] = useState<SaisieArticle | null>(null);
   const [idEdite, setIdEdite] = useState<string | null>(null);
   const [enregistrement, setEnregistrement] = useState(false);
+  const [exportEnCours, setExportEnCours] = useState(false);
 
   const [erreur, setErreur] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -157,6 +159,29 @@ export function Catalogue() {
   useEffect(() => {
     void chargerDemandes();
   }, [chargerDemandes]);
+
+  /** Exporte vers Excel tout le catalogue correspondant aux filtres affiches. */
+  async function exporter() {
+    setExportEnCours(true);
+    setErreur(null);
+    setMessage(null);
+    try {
+      const nombre = await exporterCatalogue(
+        {
+          recherche: termeApplique,
+          marqueId: filtreMarque || undefined,
+          categorie: filtreCategorie || undefined,
+        },
+        nomsMarques,
+      );
+      tracer('modification', 'articles', `Export Excel du catalogue : ${nombre} article(s)`);
+      setMessage(`${nombre} article(s) exporte(s) vers Excel.`);
+    } catch (probleme) {
+      setErreur(messageErreurArticle(probleme));
+    } finally {
+      setExportEnCours(false);
+    }
+  }
 
   function lancerRecherche() {
     setPage(0);
@@ -784,6 +809,15 @@ export function Catalogue() {
           />
           <button type="button" className="bouton bouton--discret" onClick={lancerRecherche}>
             Rechercher
+          </button>
+          <button
+            type="button"
+            className="bouton bouton--discret"
+            onClick={() => void exporter()}
+            disabled={exportEnCours || total === 0}
+            title="Exporte tout le catalogue correspondant aux filtres affiches"
+          >
+            {exportEnCours ? 'Export…' : 'Exporter en Excel'}
           </button>
 
           <select
