@@ -3,7 +3,8 @@ import { AppShell } from '../components/AppShell';
 import { listerMarques, type Marque } from '../lib/marques';
 import { ErreurBase } from '../lib/supabase';
 import { creerArticle, listerTousLesCodes, messageErreurArticle } from '../lib/articles';
-import { analyser, lireClasseur, type Analyse } from '../lib/import-catalogue';
+import { analyser, lireClasseurComplet, type Analyse } from '../lib/import-catalogue';
+import { ajouterDesignationsEnLot } from '../lib/designations-arabes';
 import { CATEGORIES, type CategorieProduit } from '../config/constants';
 import './ImportCatalogue.css';
 import { tracer } from '../lib/journal';
@@ -40,6 +41,10 @@ export function ImportCatalogue() {
   const [erreurs, setErreurs] = useState<{ ligne: number; message: string }[]>([]);
   const [erreur, setErreur] = useState<string | null>(null);
   const [termine, setTermine] = useState(false);
+  /** Le fichier contient-il une colonne « Designation arabe » ? (ancien modele : non) */
+  const [colonneArabe, setColonneArabe] = useState(false);
+  /** Designations arabes ajoutees au referentiel par le dernier import. */
+  const [arabesAjoutees, setArabesAjoutees] = useState<string[] | null>(null);
   const champFichier = useRef<HTMLInputElement>(null);
   const arret = useRef(false);
 
@@ -54,10 +59,12 @@ export function ImportCatalogue() {
       setErreur(null);
       setTermine(false);
       setErreurs([]);
+      setArabesAjoutees(null);
       setNomFichier(fichier.name);
       try {
         const donnees = await fichier.arrayBuffer();
-        const lignes = lireClasseur(donnees);
+        const { lignes, colonneArabePresente } = lireClasseurComplet(donnees, fichier.name);
+        setColonneArabe(colonneArabePresente);
         const table = new Map(marques.map((m) => [m.nom.toUpperCase(), m.id]));
         setAnalyse(analyser(lignes, table, categorieDefaut));
       } catch (probleme) {
@@ -86,6 +93,7 @@ export function ImportCatalogue() {
     setErreur(null);
     setErreurs([]);
     setTermine(false);
+    setArabesAjoutees(null);
     arret.current = false;
 
     let crees = 0;
@@ -111,12 +119,24 @@ export function ImportCatalogue() {
       const nouveaux = aTraiter.filter((l) => !existants.has(l.saisie.ean));
       ignores = aTraiter.length - nouveaux.length;
 
+      // 1 bis. Referentiel de la liste deroulante : les designations arabes du
+      // fichier qui n'y figurent pas encore y sont ajoutees en une fois.
+      try {
+        const paires = nouveaux
+          .filter((l) => l.saisie.designationArabe)
+          .map((l) => ({ ar: l.saisie.designationArabe, fr: l.saisie.designation }));
+        if (paires.length > 0) setArabesAjoutees(await ajouterDesignationsEnLot(paires));
+      } catch (probleme) {
+        // Non bloquant : les articles s'importent, la liste se completera a leur modification.
+        setErreur(`Referentiel des designations arabes non mis a jour : ${messageErreurArticle(probleme)}`);
+      }
+
       // 2. Envoi a cadence reguliere, avec reprise apres une limite atteinte.
       for (const [index, ligne] of nouveaux.entries()) {
         if (arret.current) break;
         for (let tentative = 0; ; tentative++) {
           try {
-            await creerArticle(ligne.saisie);
+            await creerArticle(ligne.saisie, { synchroniserReferentiel: false });
             crees += 1;
             break;
           } catch (probleme) {
@@ -170,7 +190,14 @@ export function ImportCatalogue() {
         <p className="carte__texte">
           Le fichier doit reprendre la structure de <code>BASE_DONNEES_EM</code> : code en
           colonne A, marque en B, designation en C, reference en D, puis six emplacements de
-          pictogrammes de E a J. Les en-tetes sont ignores, seule la position compte.
+          pictogrammes de E a J, puis, <strong>facultative</strong>, la{' '}
+          <strong>designation arabe</strong> en colonne K. Les en-tetes sont ignores, seule la
+          position compte (sauf une colonne intitulee « Designation arabe », reperee ou qu&apos;elle
+          soit). Un fichier sans colonne arabe reste accepte.{' '}
+          <a href={`${import.meta.env.BASE_URL}modeles/modele-import-catalogue.xlsx`} download>
+            Telecharger le modele Excel
+          </a>
+          .
         </p>
 
         <div className="depot" onClick={() => champFichier.current?.click()}>
@@ -295,6 +322,52 @@ export function ImportCatalogue() {
               </details>
             ) : null}
 
+            <details className="detail" open={analyse.arabe.invalides.length > 0}>
+              <summary>
+                Designation arabe — {analyse.arabe.renseignees} renseignee(s), {analyse.arabe.absentes} absente(s)
+                {colonneArabe ? '' : ' (colonne absente du fichier)'}
+              </summary>
+              <p className="detail__note">
+                {colonneArabe
+                  ? `${analyse.arabe.paires.length} designation(s) arabe(s) distincte(s) : celles qui manquent seront ajoutees au referentiel de la liste deroulante.`
+                  : 'Aucune colonne arabe detectee : les articles seront importes sans designation arabe (rien n’est efface).'}
+              </p>
+              {analyse.arabe.invalides.length > 0 ? (
+                <ul className="liste-detail">
+                  {analyse.arabe.invalides.slice(0, 20).map((v) => (
+                    <li key={v.numero}>
+                      Ligne {v.numero} — « <span dir="auto">{v.valeur}</span> » : {v.raison} Article
+                      importe sans designation arabe.
+                    </li>
+                  ))}
+                  {analyse.arabe.invalides.length > 20 ? (
+                    <li className="liste-detail__reste">… et {analyse.arabe.invalides.length - 20} autre(s)</li>
+                  ) : null}
+                </ul>
+              ) : null}
+              {analyse.arabe.incoherences.length > 0 ? (
+                <>
+                  <p className="detail__note">
+                    {analyse.arabe.incoherences.length} designation(s) francaise(s) avec plusieurs
+                    traductions differentes — a verifier (faute de frappe possible) :
+                  </p>
+                  <ul className="liste-detail">
+                    {analyse.arabe.incoherences.slice(0, 20).map((c) => (
+                      <li key={c.designation}>
+                        <strong>{c.designation}</strong> →{' '}
+                        {c.variantes.map((v, i) => (
+                          <span key={v}>
+                            {i > 0 ? ' / ' : ''}
+                            <span dir="rtl" lang="ar" className="texte-arabe">{v}</span>
+                          </span>
+                        ))}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </details>
+
             {analyse.nonClassees > 0 ? (
               <details className="detail">
                 <summary>
@@ -406,7 +479,28 @@ export function ImportCatalogue() {
                 {erreurs.length > 0
                   ? ` ${erreurs.length} ligne(s) en echec, detail ci-dessous.`
                   : ' Tous les articles du fichier sont au catalogue.'}
+                {arabesAjoutees !== null
+                  ? ` ${arabesAjoutees.length} designation(s) arabe(s) ajoutee(s) au referentiel.`
+                  : ''}
               </p>
+            ) : null}
+
+            {arabesAjoutees && arabesAjoutees.length > 0 ? (
+              <details className="detail">
+                <summary>{arabesAjoutees.length} designation(s) arabe(s) ajoutee(s) au referentiel</summary>
+                <ul className="liste-detail">
+                  {arabesAjoutees.slice(0, 50).map((a) => (
+                    <li key={a} dir="rtl" lang="ar" className="texte-arabe">
+                      {a}
+                    </li>
+                  ))}
+                  {arabesAjoutees.length > 50 ? (
+                    <li dir="ltr" className="liste-detail__reste">
+                      … et {arabesAjoutees.length - 50} autre(s)
+                    </li>
+                  ) : null}
+                </ul>
+              </details>
             ) : null}
 
             {erreurs.length > 0 ? (

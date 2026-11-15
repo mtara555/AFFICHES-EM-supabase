@@ -82,3 +82,14 @@ a {
   white-space: nowrap;
   border: 0;
 }
+
+/* --------------------------------------------------------------------------
+   Texte arabe (designation arabe) : sens RTL local, sans toucher a la mise en
+   page LTR de l'application. A utiliser avec dir="rtl" lang="ar".
+   -------------------------------------------------------------------------- */
+.texte-arabe {
+  font-family: 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Geeza Pro', Arial,
+    sans-serif;
+  unicode-bidi: plaintext;
+  letter-spacing: 0;
+}

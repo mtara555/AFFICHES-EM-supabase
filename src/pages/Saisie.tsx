@@ -345,6 +345,11 @@ export function Saisie() {
                 <span className="fiche-article__marque">
                   {nomsMarques.get(article.marqueId) ?? '—'}
                 </span>
+                {article.designationArabe ? (
+                  <span className="fiche-article__designation texte-arabe" dir="rtl" lang="ar">
+                    {article.designationArabe}
+                  </span>
+                ) : null}
                 <span className="fiche-article__designation">{article.designation}</span>
                 {article.reference ? (
                   <span className="fiche-article__reference">{article.reference}</span>

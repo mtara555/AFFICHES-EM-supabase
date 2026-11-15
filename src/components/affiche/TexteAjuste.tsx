@@ -9,6 +9,9 @@ interface TexteAjusteProps {
   readonly multiligne?: boolean;
   readonly className?: string;
   readonly style?: CSSProperties;
+  /** Sens et langue du texte (ex. « rtl » / « ar » pour la designation arabe). */
+  readonly dir?: 'ltr' | 'rtl';
+  readonly lang?: string;
   /** Cle de recalcul : a changer quand le contenu change. */
   readonly contenu: string;
   readonly children: ReactNode;
@@ -29,6 +32,8 @@ export function TexteAjuste({
   multiligne = false,
   className,
   style,
+  dir,
+  lang,
   contenu,
   children,
 }: TexteAjusteProps) {
@@ -61,7 +66,7 @@ export function TexteAjuste({
   }, [contenu, taillePt, minPt]);
 
   return (
-    <div ref={zone} className={className} style={style}>
+    <div ref={zone} className={className} style={style} dir={dir} lang={lang}>
       <span
         ref={texte}
         style={{

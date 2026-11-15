@@ -97,6 +97,7 @@ export function DetailDemande({ demande, marques, dictionnaire, surValider, surR
       ean: demande.ean,
       marqueId: demande.marqueId,
       designation: demande.designation,
+      designationArabe: demande.designationArabe,
       reference: demande.reference,
       categorie: demande.categorie,
       photoFileId: null,
@@ -128,6 +129,10 @@ export function DetailDemande({ demande, marques, dictionnaire, surValider, surR
           <dd>{marque?.nom ?? demande.marqueNom ?? '—'}</dd>
           <dt>Designation</dt>
           <dd>{demande.designation || '—'}</dd>
+          <dt>Designation arabe</dt>
+          <dd dir="rtl" lang="ar" className="texte-arabe">
+            {demande.designationArabe || '—'}
+          </dd>
           <dt>Reference</dt>
           <dd>{demande.reference || '—'}</dd>
           <dt>Categorie</dt>

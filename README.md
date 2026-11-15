@@ -164,3 +164,21 @@ Reproduction fidèle du modèle PowerPoint `EMPOTXA4.potx` (cotes en mm relevée
 **Impression / PDF** : bouton *Imprimer / PDF*, puis A4, marges *Aucune*, échelle 100 %, *Graphiques d'arrière-plan* coché. Les formats A5 / A6 / A7 sont imposés automatiquement (2 / 4 / 8 par feuille A4).
 
 **Visuels fixes** : `public/affiches/` (cadres, crédit 0 %, livraison gratuite) — extraits du modèle PowerPoint.
+
+---
+
+## Designation arabe (الاسم العربي)
+
+Chaque article peut porter une designation arabe, imprimee **au-dessus** de la designation francaise sur l'affiche.
+
+**Mise en service (base deja en service)** : *SQL Editor* → coller `supabase/migrations/20261115_designation_arabe.sql` → *Run*. Non destructif et relancable : colonne `articles.designation_arabe` (NULL pour l'existant), index de recherche, table `designations_arabes` (referentiel de la liste deroulante) et ses regles RLS.
+
+| Ecran | Comportement |
+|---|---|
+| Catalogue → formulaire | Liste deroulante editable : choix dans le referentiel, saisie libre, ou « + Ajouter une nouvelle designation » (administrateur). Champ RTL. |
+| Catalogue → liste | Colonne « Designation arabe » (RTL, tronquee avec infobulle). La recherche porte sur le code, le francais et l'arabe. |
+| Import Excel | Colonne **K** facultative « Designation arabe » (ou toute colonne intitulee « arabe »). Sans cette colonne, l'import fonctionne comme avant. Les nouvelles designations alimentent le referentiel ; le rapport d'analyse liste valeurs refusees et incoherences. Modele : `public/modeles/modele-import-catalogue.xlsx` (regenerable avec `npm run modele:import`). |
+| Affiche / PDF | Ligne arabe au-dessus du francais (RTL). Sans arabe, l'affiche est identique a l'ancienne. |
+| Demandes d'ajout | La designation arabe saisie par un operateur est transmise a l'administrateur. |
+
+**Tests** : `npm test` (Vitest) — normalisation et validation de l'arabe, import Excel (avec / sans colonne, valeurs vides ou invalides, doublons, CSV UTF-8), mise en page de l'affiche. Execute aussi par le workflow de deploiement.

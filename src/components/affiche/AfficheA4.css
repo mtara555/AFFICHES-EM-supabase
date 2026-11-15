@@ -132,6 +132,32 @@
   font-weight: 500;
 }
 
+/* --- Designation arabe (au-dessus du francais) ---------------------------- */
+/* Polices systeme arabes en premier : « BF Marjane » ne contient pas de glyphes
+   arabes, le navigateur retomberait sinon sur une police au hasard. */
+.affiche__designation-arabe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5mm 2.54mm;
+  text-align: center;
+  color: var(--affiche-bleu);
+  line-height: 1.15;
+  font-family: 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Geeza Pro', Arial,
+    sans-serif;
+  font-weight: 800;
+  /* Pas de crenage force ni d'espacement : casserait la liaison des lettres arabes. */
+  letter-spacing: 0;
+  unicode-bidi: plaintext;
+}
+
+/* Trois lignes dans la hauteur de deux : marges verticales reduites. */
+.affiche--bilingue .affiche__designation,
+.affiche--bilingue .affiche__reference {
+  padding-top: 0.4mm;
+  padding-bottom: 0.4mm;
+}
+
 /* --- Pictogrammes --------------------------------------------------------- */
 .affiche__picto {
   display: flex;

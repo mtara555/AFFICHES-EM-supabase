@@ -26,6 +26,7 @@ const ARTICLE_EXEMPLE: Article = {
   ean: '0000000000000',
   marqueId: 'exemple',
   designation: 'SECHE-CHEVEUX',
+  designationArabe: 'مجفف الشعر',
   reference: 'SECHE-CHEVEUX IONIQUE 2200W',
   categorie: 'pem',
   photoFileId: null,

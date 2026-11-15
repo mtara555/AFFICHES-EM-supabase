@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "migrer:export": "node scripts/migrer-appwrite-vers-supabase.mjs export",
-    "migrer:import": "node scripts/migrer-appwrite-vers-supabase.mjs import"
+    "migrer:import": "node scripts/migrer-appwrite-vers-supabase.mjs import",
+    "test": "vitest run",
+    "modele:import": "node scripts/generer-modele-import.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -28,6 +30,7 @@
     "node-appwrite": "^29.0.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.9",
-    "vite-plugin-pwa": "^0.20.5"
+    "vite-plugin-pwa": "^0.20.5",
+    "vitest": "^2.1.9"
   }
 }

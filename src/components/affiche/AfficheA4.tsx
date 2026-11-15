@@ -36,7 +36,8 @@ interface AfficheA4Props {
 export function AfficheA4({ donnees }: AfficheA4Props) {
   const { regles } = donnees;
   const { modele } = donnees;
-  const COTES = cotesPour(modele.disposition);
+  const avecArabe = donnees.designationArabe.trim().length > 0;
+  const COTES = cotesPour(modele.disposition, avecArabe);
   const principal = decouperMontant(donnees.prixPrincipal);
   const barre = decouperMontant(donnees.prixBarre);
   const mensualite = regles.mensualite !== null ? decouperMontant(regles.mensualite) : null;
@@ -52,7 +53,7 @@ export function AfficheA4({ donnees }: AfficheA4Props) {
 
   return (
     <article
-      className={`affiche affiche--${modele.code.replace(/[^a-z0-9-]/gi, '-')} affiche--${modele.disposition}`}
+      className={`affiche affiche--${modele.code.replace(/[^a-z0-9-]/gi, '-')} affiche--${modele.disposition}${avecArabe ? ' affiche--bilingue' : ''}`}
       aria-label={donnees.designation}
     >
       {/* Cadre opaque (JPEG, fond blanc) : sous le contenu. */}
@@ -88,10 +89,26 @@ export function AfficheA4({ donnees }: AfficheA4Props) {
         </div>
       ) : null}
 
+      {/* Designation arabe : au-dessus du francais, sens RTL, plus grande (maquette). */}
+      {avecArabe ? (
+        <TexteAjuste
+          className="affiche__designation-arabe"
+          style={zone(COTES.designationArabe)}
+          taillePt={26}
+          minPt={12}
+          multiligne
+          dir="rtl"
+          lang="ar"
+          contenu={donnees.designationArabe}
+        >
+          {donnees.designationArabe}
+        </TexteAjuste>
+      ) : null}
+
       <TexteAjuste
         className="affiche__designation"
         style={zone(COTES.designation)}
-        taillePt={24}
+        taillePt={avecArabe ? 20 : 24}
         minPt={12}
         multiligne
         contenu={donnees.designation}
