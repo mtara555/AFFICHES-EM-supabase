@@ -392,3 +392,24 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* --------------------------------------------------------------------------
+   Designation arabe : colonne dediee, RTL local, tronquee avec infobulle
+   -------------------------------------------------------------------------- */
+
+.tableau--articles .colonne-arabe {
+  max-width: 220px;
+  text-align: right;
+}
+
+.designation-arabe {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.05em;
+}
+
+.texte-discret {
+  color: var(--ink-faint);
+}

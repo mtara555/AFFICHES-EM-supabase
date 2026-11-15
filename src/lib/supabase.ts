@@ -34,6 +34,7 @@ export const supabase = createClient(
 export const TABLES = {
   MARQUES: 'marques',
   ARTICLES: 'articles',
+  DESIGNATIONS_ARABES: 'designations_arabes',
   CAMPAGNES: 'campagnes',
   AFFICHES: 'affiches',
   PARAMETRES: 'parametres',

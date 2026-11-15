@@ -10,6 +10,7 @@
 
 import { supabase, TABLES, TAILLE_PAGE, verifier, estDoublon, estDroitsRefuses, messageErreurGenerique } from './supabase';
 import type { CategorieProduit } from '../config/constants';
+import { ajouterDesignationArabe, normaliserArabe, validerArabe } from './designations-arabes';
 
 /** Nombre d'emplacements de pictogrammes par article. */
 export const NB_PICTOS = 6;
@@ -19,6 +20,8 @@ export interface Article {
   readonly ean: string;
   readonly marqueId: string;
   readonly designation: string;
+  /** Designation arabe (الاسم العربي) ; chaine vide si non renseignee. */
+  readonly designationArabe: string;
   readonly reference: string;
   readonly categorie: CategorieProduit;
   readonly photoFileId: string | null;
@@ -32,6 +35,8 @@ export interface SaisieArticle {
   ean: string;
   marqueId: string;
   designation: string;
+  /** Facultative : chaine vide = pas de ligne arabe sur l'affiche. */
+  designationArabe: string;
   reference: string;
   categorie: CategorieProduit;
   pictos: string[];
@@ -45,6 +50,7 @@ interface LigneArticle {
   ean: string;
   marque_id: string;
   designation: string;
+  designation_arabe: string | null;
   reference: string | null;
   categorie: CategorieProduit;
   photo_file_id: string | null;
@@ -59,7 +65,7 @@ interface LigneArticle {
 }
 
 const COLONNES =
-  'id, ean, marque_id, designation, reference, categorie, photo_file_id, picto1, picto2, picto3, picto4, picto5, picto6, livraison_gratuite_exclue, actif';
+  'id, ean, marque_id, designation, designation_arabe, reference, categorie, photo_file_id, picto1, picto2, picto3, picto4, picto5, picto6, livraison_gratuite_exclue, actif';
 
 function versArticle(ligne: LigneArticle): Article {
   return {
@@ -67,6 +73,7 @@ function versArticle(ligne: LigneArticle): Article {
     ean: ligne.ean,
     marqueId: ligne.marque_id,
     designation: ligne.designation,
+    designationArabe: ligne.designation_arabe ?? '',
     reference: ligne.reference ?? '',
     categorie: ligne.categorie,
     photoFileId: ligne.photo_file_id ?? null,
@@ -89,6 +96,8 @@ function versDonnees(saisie: SaisieArticle): Record<string, unknown> {
     ean: saisie.ean.trim(),
     marque_id: saisie.marqueId,
     designation: saisie.designation.trim(),
+    // Vide -> NULL en base : « pas de designation arabe ».
+    designation_arabe: normaliserArabe(saisie.designationArabe) || null,
     reference: saisie.reference.trim(),
     categorie: saisie.categorie,
     livraison_gratuite_exclue: saisie.livraisonGratuiteExclue,
@@ -106,6 +115,7 @@ export interface PageArticles {
 }
 
 export interface FiltresArticles {
+  /** Cherche dans le code, la designation francaise ET la designation arabe. */
   readonly recherche?: string;
   readonly marqueId?: string;
   readonly categorie?: CategorieProduit;
@@ -142,8 +152,11 @@ export async function listerArticles(filtres: FiltresArticles = {}): Promise<Pag
     if (/^\d{4,}$/.test(terme)) {
       requete = requete.like('ean', `${echapper(terme)}%`);
     } else {
+      // Chaque mot doit figurer dans la designation francaise OU arabe.
+      // Les caracteres reserves du filtre `or` sont retires du mot.
       for (const mot of terme.split(/\s+/).filter(Boolean)) {
-        requete = requete.ilike('designation', `%${echapper(mot)}%`);
+        const sur = mot.replace(/[%_,()"\\*]/g, '');
+        if (sur) requete = requete.or(`designation.ilike."%${sur}%",designation_arabe.ilike."%${sur}%"`);
       }
     }
   }
@@ -189,17 +202,44 @@ export async function listerTousLesCodes(): Promise<Set<string>> {
   return codes;
 }
 
-export async function creerArticle(saisie: SaisieArticle): Promise<Article> {
+export interface OptionsEcriture {
+  /**
+   * Ajoute la designation arabe au referentiel de la liste deroulante
+   * (defaut : oui). L'import en masse le desactive : il alimente le
+   * referentiel en une seule fois.
+   */
+  readonly synchroniserReferentiel?: boolean;
+}
+
+/** Alimente le referentiel ; un echec n'empeche jamais l'enregistrement de l'article. */
+async function synchroniserReferentiel(saisie: SaisieArticle, options: OptionsEcriture): Promise<void> {
+  if (options.synchroniserReferentiel === false) return;
+  const ar = normaliserArabe(saisie.designationArabe);
+  if (!ar) return;
+  try {
+    await ajouterDesignationArabe(ar, saisie.designation);
+  } catch {
+    /* referentiel indisponible : l'article est enregistre, la liste se completera plus tard */
+  }
+}
+
+export async function creerArticle(saisie: SaisieArticle, options: OptionsEcriture = {}): Promise<Article> {
   const ligne = verifier(
     await supabase.from(TABLES.ARTICLES).insert(versDonnees(saisie)).select(COLONNES).single(),
   );
+  await synchroniserReferentiel(saisie, options);
   return versArticle(ligne as LigneArticle);
 }
 
-export async function modifierArticle(id: string, saisie: SaisieArticle): Promise<Article> {
+export async function modifierArticle(
+  id: string,
+  saisie: SaisieArticle,
+  options: OptionsEcriture = {},
+): Promise<Article> {
   const ligne = verifier(
     await supabase.from(TABLES.ARTICLES).update(versDonnees(saisie)).eq('id', id).select(COLONNES).single(),
   );
+  await synchroniserReferentiel(saisie, options);
   return versArticle(ligne as LigneArticle);
 }
 
@@ -234,6 +274,9 @@ export function validerArticle(saisie: SaisieArticle): string[] {
   if (!saisie.ean.trim()) problemes.push('Le code article est obligatoire.');
   if (!saisie.designation.trim()) problemes.push('La designation est obligatoire.');
   if (!saisie.marqueId) problemes.push('La marque est obligatoire.');
+  // Designation arabe facultative, mais si elle est saisie elle doit etre valide.
+  const probleme = validerArabe(saisie.designationArabe);
+  if (probleme) problemes.push(probleme);
   return problemes;
 }
 

@@ -91,6 +91,8 @@ export const COTES = {
   logo: { x: 59.7, y: 39.2, l: 84.2, h: 34.8 }, // Rectangle 3
   badge: { x: 153.5, y: 38.1, l: 38.1, h: 35.9 }, // Rectangle 6
   designation: { x: 27.6, y: 74.0, l: 148.4, h: 16.5 }, // Rectangle 4
+  // Ligne arabe : zone de reference, utilisee seulement avec `cotesPour(..., true)` (voir plus bas).
+  designationArabe: { x: 27.6, y: 74.0, l: 148.4, h: 11.5 },
   reference: { x: 27.6, y: 90.5, l: 148.4, h: 16.5 }, // Rectangle 5
   pictos: [
     { x: 19.5, y: 107.9, l: 30.0, h: 25.0 }, // Rectangle 1  — colonne E
@@ -205,6 +207,31 @@ const COTES_MACARON_LARGE: Cotes = {
   economie: { x: 28.0, y: 190, l: 152.0, h: 55 },
 };
 
-export function cotesPour(disposition: Disposition): Cotes {
-  return disposition === 'macaron-large' ? COTES_MACARON_LARGE : COTES;
+/**
+ * Variantes « bilingues » : quand l'article a une designation arabe, elle
+ * s'imprime AU-DESSUS de la designation francaise (maquette « Whirlpool —
+ * غسالة ومجففة / LAVANTE SECHANTE »). Les trois lignes (arabe, francais,
+ * reference) se partagent la hauteur que prenaient les deux lignes d'origine,
+ * de sorte que les pictogrammes et le bloc prix ne bougent pas.
+ *
+ * Sans designation arabe, les cotes d'origine sont reprises a l'identique :
+ * les affiches existantes s'impriment exactement comme avant.
+ */
+const COTES_BILINGUE: Cotes = {
+  ...COTES,
+  designationArabe: { x: 27.6, y: 74.0, l: 148.4, h: 12.5 },
+  designation: { x: 27.6, y: 86.5, l: 148.4, h: 9.0 },
+  reference: { x: 27.6, y: 95.5, l: 148.4, h: 11.0 },
+};
+
+const COTES_MACARON_LARGE_BILINGUE: Cotes = {
+  ...COTES_MACARON_LARGE,
+  designationArabe: { x: 27.6, y: 96, l: 154, h: 11 },
+  designation: { x: 27.6, y: 107, l: 154, h: 9.5 },
+  reference: { x: 27.6, y: 116.5, l: 154, h: 7.5 },
+};
+
+export function cotesPour(disposition: Disposition, avecArabe = false): Cotes {
+  if (disposition === 'macaron-large') return avecArabe ? COTES_MACARON_LARGE_BILINGUE : COTES_MACARON_LARGE;
+  return avecArabe ? COTES_BILINGUE : COTES;
 }

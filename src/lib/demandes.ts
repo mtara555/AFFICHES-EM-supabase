@@ -15,6 +15,7 @@
  */
 
 import { supabase, TABLES, verifier, estDroitsRefuses, messageErreurGenerique } from './supabase';
+import { normaliserArabe } from './designations-arabes';
 import type { CategorieProduit } from '../config/constants';
 import type { SaisieArticle } from './articles';
 
@@ -31,6 +32,7 @@ interface Contenu {
   m?: string; // marqueId
   mn?: string; // nom de la marque (lisible meme si la marque change)
   d?: string; // designation
+  a?: string; // designation arabe (absente des anciennes demandes)
   r?: string; // reference
   c?: CategorieProduit;
   p?: string[]; // pictos
@@ -48,6 +50,7 @@ export interface DemandeArticle {
   readonly marqueId: string;
   readonly marqueNom: string;
   readonly designation: string;
+  readonly designationArabe: string;
   readonly reference: string;
   readonly categorie: CategorieProduit;
   readonly pictos: readonly string[];
@@ -87,6 +90,7 @@ const versDemande = (l: LigneDemande): DemandeArticle => {
     marqueId: c.m ?? '',
     marqueNom: c.mn ?? '',
     designation: c.d ?? '',
+    designationArabe: c.a ?? '',
     reference: c.r ?? '',
     categorie: c.c ?? 'gem',
     pictos: Array.from({ length: 6 }, (_, i) => c.p?.[i] ?? ''),
@@ -113,6 +117,7 @@ export async function envoyerDemande(
           m: saisie.marqueId,
           mn: marqueNom,
           d: saisie.designation.trim(),
+          a: normaliserArabe(saisie.designationArabe) || undefined,
           r: saisie.reference.trim(),
           c: saisie.categorie,
           p: saisie.pictos.map((x) => x.trim()),
@@ -149,6 +154,7 @@ export async function cloturerDemande(
       m: demande.marqueId,
       mn: demande.marqueNom,
       d: demande.designation,
+      a: demande.designationArabe || undefined,
       r: demande.reference,
       c: demande.categorie,
       p: [...demande.pictos],
@@ -165,6 +171,7 @@ export function saisieDepuisDemande(d: DemandeArticle): SaisieArticle {
     ean: d.ean,
     marqueId: d.marqueId,
     designation: d.designation,
+    designationArabe: d.designationArabe,
     reference: d.reference,
     categorie: d.categorie,
     pictos: [...d.pictos],

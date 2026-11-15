@@ -22,6 +22,8 @@ import './Catalogue.css';
 import { tracer } from '../lib/journal';
 import { useAuth } from '../context/AuthContext';
 import { DetailDemande } from '../components/DetailDemande';
+import { ChampDesignationArabe } from '../components/ChampDesignationArabe';
+import { validerArabe } from '../lib/designations-arabes';
 import {
   cloturerDemande,
   envoyerDemande,
@@ -38,6 +40,7 @@ const SAISIE_VIDE: SaisieArticle = {
   ean: '',
   marqueId: '',
   designation: '',
+  designationArabe: '',
   reference: '',
   categorie: 'gem',
   pictos: Array.from({ length: NB_PICTOS }, () => ''),
@@ -50,6 +53,7 @@ function versSaisie(article: Article): SaisieArticle {
     ean: article.ean,
     marqueId: article.marqueId,
     designation: article.designation,
+    designationArabe: article.designationArabe,
     reference: article.reference,
     categorie: article.categorie,
     pictos: [...article.pictos],
@@ -166,6 +170,8 @@ export function Catalogue() {
     if (!saisie.ean.trim()) problemes.push('Le code article est obligatoire.');
     if (!saisie.designation.trim()) problemes.push('La designation est obligatoire.');
     if (!saisie.marqueId && !texteMarque.trim()) problemes.push('Indiquez la marque.');
+    const problemeArabe = validerArabe(saisie.designationArabe);
+    if (problemeArabe) problemes.push(problemeArabe);
     if (problemes.length > 0) {
       setErreur(problemes.join(' '));
       return;
@@ -539,6 +545,24 @@ export function Catalogue() {
               <AvisCorrection champ="designation" />
             </div>
 
+            {/* Designation arabe : liste deroulante editable (selection, saisie libre, ajout). */}
+            <div className="champ">
+              <label htmlFor="designation-arabe">
+                Designation arabe <span className="texte-arabe" dir="rtl" lang="ar">(الاسم العربي)</span>
+              </label>
+              <ChampDesignationArabe
+                id="designation-arabe"
+                valeur={saisie.designationArabe}
+                surChangement={(v) => setSaisie({ ...saisie, designationArabe: v })}
+                designationFr={saisie.designation}
+                peutCreer={estAdmin}
+                desactive={enregistrement}
+              />
+              <p className="champ__aide">
+                Facultative. Imprimee au-dessus de la designation francaise sur l&apos;affiche.
+              </p>
+            </div>
+
             <div className="champ">
               <label htmlFor="categorie">Categorie</label>
               <select
@@ -751,7 +775,7 @@ export function Catalogue() {
           <input
             type="search"
             className="recherche"
-            placeholder="Code article ou designation…"
+            placeholder="Code, designation ou الاسم العربي…"
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             onKeyDown={(e) => {
@@ -808,6 +832,7 @@ export function Catalogue() {
                 <tr>
                   <th scope="col">Code</th>
                   <th scope="col">Designation</th>
+                  <th scope="col">Designation arabe</th>
                   <th scope="col">Marque</th>
                   <th scope="col">Pictogrammes</th>
                   <th scope="col">
@@ -826,6 +851,20 @@ export function Catalogue() {
                       {article.reference ? (
                         <span className="reference">{article.reference}</span>
                       ) : null}
+                    </td>
+                    <td className="colonne-arabe">
+                      {article.designationArabe ? (
+                        <span
+                          className="texte-arabe designation-arabe"
+                          dir="rtl"
+                          lang="ar"
+                          title={article.designationArabe}
+                        >
+                          {article.designationArabe}
+                        </span>
+                      ) : (
+                        <span className="texte-discret">—</span>
+                      )}
                     </td>
                     <td>{nomsMarques.get(article.marqueId) ?? '—'}</td>
                     <td>

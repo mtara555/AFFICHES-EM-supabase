@@ -85,6 +85,7 @@ create table if not exists public.articles (
   ean                        text not null unique,
   marque_id                  text not null,
   designation                text not null,
+  designation_arabe          text,
   reference                  text not null default '',
   categorie                  text not null,
   photo_file_id              text,
@@ -102,6 +103,13 @@ create index if not exists idx_articles_marque on public.articles (marque_id);
 create index if not exists idx_articles_categorie on public.articles (categorie);
 create index if not exists idx_articles_designation on public.articles
   using gin (designation gin_trgm_ops);
+
+-- Designation arabe : pour une base DEJA en service, lancer plutot
+-- supabase/migrations/20261115_designation_arabe.sql (colonne, contrainte,
+-- index, table `designations_arabes` et ses regles RLS).
+alter table public.articles add column if not exists designation_arabe text;
+create index if not exists idx_articles_designation_arabe on public.articles
+  using gin (designation_arabe gin_trgm_ops);
 
 create table if not exists public.campagnes (
   id         text primary key default gen_random_uuid()::text,
@@ -294,3 +302,9 @@ create policy medias_suppr on storage.objects
 --
 --    update public.profiles set role = 'administrateur'
 --    where id = (select id from auth.users where email = 'vous@exemple.com');
+
+-- ---------------------------------------------------------------------------
+-- Designation arabe : referentiel de la liste deroulante
+-- Le detail (contraintes, amorcage) est dans
+-- supabase/migrations/20261115_designation_arabe.sql : le lancer apres ce script.
+-- ---------------------------------------------------------------------------

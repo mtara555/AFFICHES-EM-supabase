@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
 import type { CategorieProduit } from '../config/constants';
 import type { SaisieArticle } from './articles';
 import { NB_PICTOS } from './articles';
+import { normaliserArabe, validerArabe, type PaireArabeFrancais } from './designations-arabes';
 
 /* -------------------------------------------------------------------------- */
 /* Normalisation                                                               */
@@ -159,6 +160,40 @@ interface LigneBrute {
   readonly designation: string;
   readonly reference: string;
   readonly pictos: string[];
+  /** Colonne facultative « Designation arabe » (K par defaut) ; vide si absente. */
+  readonly designationArabe: string;
+}
+
+/** Position par defaut de la colonne arabe : juste apres les six pictogrammes (E a J). */
+export const COLONNE_ARABE_DEFAUT = 10; // colonne K
+
+const MOTIF_ENTETE_ARABE = /arab|\u0639\u0631\u0628/i;
+
+/**
+ * Cherche la colonne arabe dans la ligne d'en-tetes : toute cellule dont le
+ * titre contient « arabe », « arabic » ou « عرب ». A defaut, la colonne K est
+ * lue : un fichier sans colonne arabe (ancien modele) reste donc valide, ses
+ * cellules K etant vides.
+ */
+export function detecterColonneArabe(entetes: readonly unknown[] | undefined): number {
+  if (entetes) {
+    const trouvee = entetes.findIndex((c, i) => i > 0 && MOTIF_ENTETE_ARABE.test(String(c ?? '')));
+    if (trouvee > 0) return trouvee;
+  }
+  return COLONNE_ARABE_DEFAUT;
+}
+
+/**
+ * Decode un CSV en UTF-8 (avec ou sans BOM) ; si le fichier n'est pas de
+ * l'UTF-8 valide (export Excel « CSV » ANSI), il est lu en Windows-1252.
+ * Sans cette etape, SheetJS devine l'encodage et l'arabe devient illisible.
+ */
+export function decoderCsv(donnees: ArrayBuffer): string {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(donnees);
+  } catch {
+    return new TextDecoder('windows-1252').decode(donnees);
+  }
 }
 
 /**
@@ -169,13 +204,28 @@ interface LigneBrute {
  * l'autre. La position, elle, est stable — c'est d'ailleurs ainsi que la macro
  * VBA procedait.
  */
-export function lireClasseur(donnees: ArrayBuffer): LigneBrute[] {
-  const classeur = XLSX.read(donnees, { type: 'array' });
+export function lireClasseur(donnees: ArrayBuffer, nomFichier = ''): LigneBrute[] {
+  return lireClasseurComplet(donnees, nomFichier).lignes;
+}
+
+export interface LectureClasseur {
+  readonly lignes: LigneBrute[];
+  /** Vrai si le fichier a un en-tete arabe ou au moins une valeur dans la colonne arabe. */
+  readonly colonneArabePresente: boolean;
+}
+
+/** Comme `lireClasseur`, en indiquant en plus si la colonne arabe existe dans le fichier. */
+export function lireClasseurComplet(donnees: ArrayBuffer, nomFichier = ''): LectureClasseur {
+  const vide: LectureClasseur = { lignes: [], colonneArabePresente: false };
+  // CSV : decodage explicite (UTF-8 / Windows-1252) ; classeurs Excel : lecture binaire.
+  const classeur = /\.csv$/i.test(nomFichier)
+    ? XLSX.read(decoderCsv(donnees), { type: 'string', raw: true })
+    : XLSX.read(donnees, { type: 'array' });
   const premiereFeuille = classeur.SheetNames[0];
-  if (!premiereFeuille) return [];
+  if (!premiereFeuille) return vide;
 
   const feuille = classeur.Sheets[premiereFeuille];
-  if (!feuille) return [];
+  if (!feuille) return vide;
 
   // Valeurs brutes : avec le texte affiche (raw: false), Excel rend les codes
   // longs au format « Standard » en notation scientifique (8.8061E+12), et
@@ -187,6 +237,8 @@ export function lireClasseur(donnees: ArrayBuffer): LigneBrute[] {
   });
 
   const lignes: LigneBrute[] = [];
+  const colonneArabe = detecterColonneArabe(matrice[0]);
+  let colonneArabePresente = MOTIF_ENTETE_ARABE.test(String(matrice[0]?.[colonneArabe] ?? ''));
 
   // La premiere ligne porte les en-tetes : on demarre a l'indice 1.
   for (let i = 1; i < matrice.length; i++) {
@@ -203,10 +255,13 @@ export function lireClasseur(donnees: ArrayBuffer): LigneBrute[] {
       designation: normaliserLibelle(texteCellule(cellules[2])),
       reference: texteCellule(cellules[3]),
       pictos: [4, 5, 6, 7, 8, 9].map((colonne) => normaliserCode(texteCellule(cellules[colonne]))),
+      // Arabe : pas de mise en majuscules, seulement NFC + espaces (voir normaliserArabe).
+      designationArabe: normaliserArabe(texteCellule(cellules[colonneArabe])),
     });
+    if (normaliserArabe(texteCellule(cellules[colonneArabe]))) colonneArabePresente = true;
   }
 
-  return lignes;
+  return { lignes, colonneArabePresente };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -219,6 +274,7 @@ function completude(ligne: LigneBrute): number {
   if (ligne.marque) score += 1;
   if (ligne.designation) score += 1;
   if (ligne.reference) score += 1;
+  if (ligne.designationArabe) score += 1;
   score += ligne.pictos.filter((p) => p.length > 0).length;
   return score;
 }
@@ -292,6 +348,21 @@ export interface Analyse {
   readonly formesUnifiees: { readonly canonique: string; readonly variantes: string[] }[];
   /** Articles dont la categorie n'a pas pu etre deduite de la designation. */
   readonly nonClassees: number;
+  /** Bilan de la designation arabe (colonne facultative). */
+  readonly arabe: RapportArabe;
+}
+
+export interface RapportArabe {
+  /** Articles prets, avec une designation arabe valide. */
+  readonly renseignees: number;
+  /** Articles prets, sans designation arabe (cellule vide ou colonne absente). */
+  readonly absentes: number;
+  /** Valeurs refusees : l'article est importe, mais SANS sa designation arabe. */
+  readonly invalides: { readonly numero: number; readonly valeur: string; readonly raison: string }[];
+  /** Couples arabe / francais distincts, destines au referentiel de la liste deroulante. */
+  readonly paires: PaireArabeFrancais[];
+  /** Une meme designation francaise portee par plusieurs traductions differentes (faute de frappe probable). */
+  readonly incoherences: { readonly designation: string; readonly variantes: string[] }[];
 }
 
 /**
@@ -329,6 +400,10 @@ export function analyser(
   }
 
   const pretes: LignePreparee[] = [];
+  const invalidesArabe: RapportArabe['invalides'][number][] = [];
+  const pairesArabe = new Map<string, string>();
+  const traductions = new Map<string, Set<string>>();
+  let avecArabe = 0;
   const marquesManquantes = new Map<string, number>();
   const sansDesignation: number[] = [];
   let nonClassees = 0;
@@ -351,6 +426,21 @@ export function analyser(
     const pictos = [...ligne.pictos];
     while (pictos.length < NB_PICTOS) pictos.push('');
 
+    // Designation arabe : facultative. Une valeur invalide n'ecarte pas l'article.
+    let designationArabe = ligne.designationArabe;
+    const problemeArabe = validerArabe(designationArabe);
+    if (problemeArabe) {
+      invalidesArabe.push({ numero: ligne.numero, valeur: designationArabe, raison: problemeArabe });
+      designationArabe = '';
+    }
+    if (designationArabe) {
+      avecArabe += 1;
+      if (!pairesArabe.has(designationArabe)) pairesArabe.set(designationArabe, designation);
+      const variantes = traductions.get(designation) ?? new Set<string>();
+      variantes.add(designationArabe);
+      traductions.set(designation, variantes);
+    }
+
     pretes.push({
       numero: ligne.numero,
       marqueNom: ligne.marque,
@@ -358,6 +448,7 @@ export function analyser(
         ean: ligne.code,
         marqueId,
         designation,
+        designationArabe,
         reference: ligne.reference,
         categorie,
         pictos: pictos.slice(0, NB_PICTOS),
@@ -377,5 +468,14 @@ export function analyser(
     sansDesignation,
     formesUnifiees: formesUnifiees.sort((a, b) => b.variantes.length - a.variantes.length),
     nonClassees,
+    arabe: {
+      renseignees: avecArabe,
+      absentes: pretes.length - avecArabe,
+      invalides: invalidesArabe,
+      paires: [...pairesArabe].map(([ar, fr]) => ({ ar, fr })),
+      incoherences: [...traductions]
+        .filter(([, v]) => v.size > 1)
+        .map(([designation, v]) => ({ designation, variantes: [...v] })),
+    },
   };
 }

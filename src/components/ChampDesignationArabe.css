@@ -1,0 +1,78 @@
+/* Liste deroulante editable de la designation arabe.
+   Reprend les variables de l'application (tokens.css). Le champ est en RTL,
+   la liste reste alignee comme le reste du formulaire (LTR). */
+
+.champ-arabe {
+  position: relative;
+}
+
+.champ-arabe__saisie {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-size: var(--text-md, 1rem);
+  background: var(--surface-sunken);
+  text-align: right;
+}
+
+.champ-arabe__saisie[aria-invalid='true'] {
+  border-color: var(--warn);
+}
+
+.champ-arabe__liste {
+  position: absolute;
+  z-index: 30;
+  inset-inline: 0;
+  top: calc(100% + 2px);
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(14, 19, 48, 0.14);
+}
+
+.champ-arabe__option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 11px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+
+.champ-arabe__option.est-actif,
+.champ-arabe__option:hover {
+  background: var(--surface-sunken);
+}
+
+.champ-arabe__ar {
+  font-size: 1.05em;
+  font-weight: 600;
+}
+
+.champ-arabe__fr {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.champ-arabe__option--ajout {
+  justify-content: flex-start;
+  border-top: 1px solid var(--line);
+  color: var(--brand-blue);
+  font-weight: var(--weight-bold);
+}
+
+.champ-arabe__vide {
+  padding: 7px 11px;
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}

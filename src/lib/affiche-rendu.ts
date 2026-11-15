@@ -27,6 +27,8 @@ export interface DonneesAffiche {
   readonly logoFileId: string | null;
   /** Ligne 1 — designation (colonne C du classeur). */
   readonly designation: string;
+  /** Designation arabe, imprimee au-dessus de la designation francaise ; vide = ligne absente. */
+  readonly designationArabe: string;
   /** Ligne 2 — reference commerciale (colonne D). */
   readonly reference: string;
   /** Six emplacements ordonnes, chaine vide = emplacement libre. */
@@ -72,6 +74,7 @@ export function preparerDonnees(
     marqueNom: marque?.nom ?? '',
     logoFileId: marque ? (marque.logoFileId ?? idLogo(marque.id)) : null,
     designation: article.designation,
+    designationArabe: article.designationArabe,
     reference: article.reference,
     pictos: article.pictos,
     prixBarre,
