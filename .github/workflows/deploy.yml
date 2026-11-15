@@ -43,6 +43,9 @@ jobs:
       - name: Verification des types
         run: npm run typecheck
 
+      - name: Tests unitaires
+        run: npm test
+
       - name: Compilation
         # Vite inscrit les variables VITE_* dans le code AU MOMENT de la
         # compilation : elles doivent donc etre presentes ici, et pas seulement
