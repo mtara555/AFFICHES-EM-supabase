@@ -1,0 +1,48 @@
+.import-arabe {
+  display: grid;
+  gap: 12px;
+}
+.import-arabe__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.import-arabe__entete h2 {
+  margin: 0;
+  font-size: var(--text-lg, 1.1rem);
+}
+.import-arabe__aide {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-soft, inherit);
+}
+.import-arabe__erreur {
+  margin: 0;
+  color: var(--warn);
+  font-weight: var(--weight-bold);
+}
+.import-arabe__bilan {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: var(--text-sm);
+}
+.import-arabe__detail {
+  margin: 0 0 8px;
+  font-size: var(--text-sm);
+}
+.import-arabe__detail summary {
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+}
+.import-arabe__detail ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.import-arabe__resultat {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
