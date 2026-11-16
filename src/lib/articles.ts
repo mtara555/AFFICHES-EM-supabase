@@ -202,6 +202,44 @@ export async function listerTousLesCodes(): Promise<Set<string>> {
   return codes;
 }
 
+export interface CorrespondanceArabe {
+  readonly designation: string;
+  readonly designationArabe: string;
+}
+
+/**
+ * Code article -> designation francaise et arabe actuelles, pour tout le
+ * catalogue (lecture par pages de 500, deux colonnes seulement). Sert a
+ * l'import « mise a jour des designations arabes ».
+ */
+export async function listerCorrespondancesArabe(): Promise<Map<string, CorrespondanceArabe>> {
+  const table = new Map<string, CorrespondanceArabe>();
+  for (let debut = 0; ; debut += TAILLE_PAGE) {
+    const lignes = verifier(
+      await supabase
+        .from(TABLES.ARTICLES)
+        .select('ean, designation, designation_arabe')
+        .order('id', { ascending: true })
+        .range(debut, debut + TAILLE_PAGE - 1),
+    ) as { ean: string; designation: string; designation_arabe: string | null }[];
+    for (const l of lignes) {
+      table.set(l.ean, { designation: l.designation, designationArabe: l.designation_arabe ?? '' });
+    }
+    if (lignes.length < TAILLE_PAGE) break;
+  }
+  return table;
+}
+
+/** Met a jour la SEULE designation arabe d'un article, repere par son code. */
+export async function mettreAJourDesignationArabe(ean: string, designationArabe: string): Promise<void> {
+  verifier(
+    await supabase
+      .from(TABLES.ARTICLES)
+      .update({ designation_arabe: normaliserArabe(designationArabe) || null })
+      .eq('ean', ean),
+  );
+}
+
 export interface OptionsEcriture {
   /**
    * Ajoute la designation arabe au referentiel de la liste deroulante

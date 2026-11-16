@@ -144,7 +144,7 @@ export function deduireCategorie(designation: string): CategorieProduit | null {
  * Texte d'une cellule lue en valeur brute. Un nombre entier redevient une
  * suite de chiffres complete (6942351415628), jamais « 6.94235E+12 ».
  */
-function texteCellule(valeur: unknown): string {
+export function texteCellule(valeur: unknown): string {
   if (valeur === null || valeur === undefined) return '';
   if (typeof valeur === 'number') {
     return Number.isInteger(valeur) ? valeur.toFixed(0) : String(valeur);

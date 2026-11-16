@@ -25,6 +25,7 @@ import { DetailDemande } from '../components/DetailDemande';
 import { ChampDesignationArabe } from '../components/ChampDesignationArabe';
 import { validerArabe } from '../lib/designations-arabes';
 import { exporterCatalogue } from '../lib/export-catalogue';
+import { ImportDesignationsArabes } from '../components/ImportDesignationsArabes';
 import {
   cloturerDemande,
   envoyerDemande,
@@ -87,6 +88,7 @@ export function Catalogue() {
   const [idEdite, setIdEdite] = useState<string | null>(null);
   const [enregistrement, setEnregistrement] = useState(false);
   const [exportEnCours, setExportEnCours] = useState(false);
+  const [panneauArabe, setPanneauArabe] = useState(false);
 
   const [erreur, setErreur] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -456,6 +458,9 @@ export function Catalogue() {
             <Link to="/catalogue/import" className="bouton bouton--discret">
               Importer un fichier
             </Link>
+            <button type="button" className="bouton bouton--discret" onClick={() => setPanneauArabe(true)}>
+              Importer les designations arabes
+            </button>
             <button type="button" className="bouton bouton--principal" onClick={() => ouvrirCreation()}>
               Nouvel article
             </button>
@@ -793,6 +798,13 @@ export function Catalogue() {
             ) : null;
           })()}
         </section>
+      ) : null}
+
+      {estAdmin && panneauArabe ? (
+        <ImportDesignationsArabes
+          surTermine={() => void charger()}
+          surFermer={() => setPanneauArabe(false)}
+        />
       ) : null}
 
       <section className="carte">

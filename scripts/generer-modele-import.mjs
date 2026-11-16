@@ -41,3 +41,27 @@ XLSX.utils.book_append_sheet(classeur, notice, 'Notice');
 mkdirSync('public/modeles', { recursive: true });
 writeFileSync('public/modeles/modele-import-catalogue.xlsx', XLSX.write(classeur, { type: 'buffer', bookType: 'xlsx' }));
 console.log('Modele ecrit : public/modeles/modele-import-catalogue.xlsx');
+
+// ---------------------------------------------------------------------------
+// Modele de mise a jour des designations arabes (deux colonnes) — ecran Catalogue
+// ---------------------------------------------------------------------------
+const feuilleArabe = XLSX.utils.aoa_to_sheet([
+  ['Code article', 'Designation arabe (الاسم العربي)'],
+  ['8003437000001', 'غسالة ومجففة'],
+  ['8003437000002', 'ثلاجة'],
+]);
+feuilleArabe['!cols'] = [{ wch: 20 }, { wch: 40 }];
+for (const ref of ['A2', 'A3']) feuilleArabe[ref].t = 's';
+const noticeArabe = XLSX.utils.aoa_to_sheet([
+  ['Mise a jour des designations arabes — notice'],
+  ['Colonne A : code article (doit deja exister au catalogue). Colonne B : designation arabe.'],
+  ['Les codes inconnus sont ignores : ce fichier ne cree aucun article.'],
+  ['Une cellule arabe vide n\'efface pas la valeur existante.'],
+  ['Maximum 120 caracteres, lettres arabes obligatoires.'],
+]);
+noticeArabe['!cols'] = [{ wch: 100 }];
+const classeurArabe = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(classeurArabe, feuilleArabe, 'Designations arabes');
+XLSX.utils.book_append_sheet(classeurArabe, noticeArabe, 'Notice');
+writeFileSync('public/modeles/modele-import-designations-arabes.xlsx', XLSX.write(classeurArabe, { type: 'buffer', bookType: 'xlsx' }));
+console.log('Modele ecrit : public/modeles/modele-import-designations-arabes.xlsx');
