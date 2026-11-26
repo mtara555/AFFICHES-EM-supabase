@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { GraphiqueAffiches, COULEUR_ELECTRO, COULEUR_NT } from '../components/stats/GraphiqueAffiches';
+import { RapportPdf } from '../components/stats/RapportPdf';
 import { estConfigure } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { LIBELLE_ROLE } from '../lib/auth';
@@ -281,6 +282,9 @@ export function TableauDeBord() {
           </div>
         ) : null}
       </section>
+
+      {/* --- Rapport PDF (jour, semaine, mois, trimestre, annee) ------------ */}
+      <RapportPdf affiches={affiches} marques={marques} chargement={chargement} />
 
       {/* --- Articles par marque ------------------------------------------- */}
       <section className="carte">
