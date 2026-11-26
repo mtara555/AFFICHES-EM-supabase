@@ -53,8 +53,11 @@ export interface ArticleResume {
 
 export interface AfficheResume {
   readonly date: Date;
+  readonly ean: string;
   /** null si le code n'existe plus dans le catalogue. */
   readonly gabarit: Gabarit | null;
+  /** null si le code n'existe plus dans le catalogue. */
+  readonly marqueId: string | null;
 }
 
 interface LigneArticleResume {
@@ -119,11 +122,16 @@ export async function chargerAffichesResume(
   }
   ecrireCache(cle, lignes.length, lignes);
 
-  const gabaritParEan = new Map(articles.map((a) => [a.ean, a.gabarit]));
-  return lignes.map((l) => ({
-    date: new Date(l.created_at),
-    gabarit: gabaritParEan.get(l.ean) ?? null,
-  }));
+  const articleParEan = new Map(articles.map((a) => [a.ean, a]));
+  return lignes.map((l) => {
+    const article = articleParEan.get(l.ean);
+    return {
+      date: new Date(l.created_at),
+      ean: l.ean,
+      gabarit: article?.gabarit ?? null,
+      marqueId: article?.marqueId ?? null,
+    };
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -260,4 +268,179 @@ export function regrouper(periode: Periode, affiches: readonly AfficheResume[]):
     else cible.nt += 1;
   }
   return intervalles;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Rapport PDF : une periode choisie (jour, semaine, mois, trimestre, annee)   */
+/* -------------------------------------------------------------------------- */
+
+export type PeriodeRapport = 'jour' | 'semaine' | 'mois' | 'trimestre' | 'annee';
+
+export const LIBELLE_PERIODE_RAPPORT: Readonly<Record<PeriodeRapport, string>> = {
+  jour: 'Jour',
+  semaine: 'Semaine',
+  mois: 'Mois',
+  trimestre: 'Trimestre',
+  annee: 'Annee',
+};
+
+export interface SousIntervalle {
+  readonly libelle: string;
+  readonly debut: Date;
+  readonly fin: Date;
+}
+
+export interface PlageRapport {
+  readonly type: PeriodeRapport;
+  /** Premier instant de la periode (inclus). */
+  readonly debut: Date;
+  /** Premier instant apres la periode (exclu). */
+  readonly fin: Date;
+  /** Titre lisible : « Semaine 47 — du 16 au 22 novembre 2026 ». */
+  readonly libelle: string;
+  /** Periode de meme nature juste avant, pour la comparaison. */
+  readonly precedente: { readonly debut: Date; readonly fin: Date };
+  /** Nom de la colonne du detail : Heure, Jour ou Mois. */
+  readonly colonne: string;
+  readonly sousIntervalles: readonly SousIntervalle[];
+}
+
+const fMoisSeul = fmt({ month: 'long' });
+const fMoisCourt = fmt({ month: 'short' });
+const fJourCourt = fmt({ weekday: 'short', day: '2-digit', month: '2-digit' });
+const fJourMois = fmt({ day: 'numeric', month: 'long' });
+
+const premiereMajuscule = (t: string) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : t);
+
+function sousIntervallesParMois(annee: number, premierMois: number, nombre: number): SousIntervalle[] {
+  const liste: SousIntervalle[] = [];
+  for (let i = 0; i < nombre; i++) {
+    const debut = new Date(annee, premierMois + i, 1);
+    liste.push({
+      libelle: nombre > 3 ? fMoisCourt.format(debut).replace('.', '') : premiereMajuscule(fMoisSeul.format(debut)),
+      debut,
+      fin: new Date(annee, premierMois + i + 1, 1),
+    });
+  }
+  return liste;
+}
+
+/**
+ * Calcule la periode du rapport qui CONTIENT la date de reference :
+ * le jour, la semaine (du lundi au dimanche), le mois, le trimestre civil
+ * ou l'annee de cette date.
+ */
+export function calculerPlage(type: PeriodeRapport, reference: Date): PlageRapport {
+  const jour = debutJour(reference);
+
+  if (type === 'jour') {
+    const debut = jour;
+    const fin = ajouterJours(debut, 1);
+    const sous: SousIntervalle[] = [];
+    for (let h = 0; h < 24; h++) {
+      sous.push({
+        libelle: `${String(h).padStart(2, '0')}h`,
+        debut: new Date(debut.getFullYear(), debut.getMonth(), debut.getDate(), h),
+        fin: new Date(debut.getFullYear(), debut.getMonth(), debut.getDate(), h + 1),
+      });
+    }
+    return {
+      type,
+      debut,
+      fin,
+      libelle: premiereMajuscule(fJourLong.format(debut)),
+      precedente: { debut: ajouterJours(debut, -1), fin: debut },
+      colonne: 'Heure',
+      sousIntervalles: sous,
+    };
+  }
+
+  if (type === 'semaine') {
+    const debut = debutSemaine(jour);
+    const fin = ajouterJours(debut, 7);
+    const dernier = ajouterJours(fin, -1);
+    const sous: SousIntervalle[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = ajouterJours(debut, i);
+      sous.push({
+        libelle: premiereMajuscule(fJourCourt.format(d).replace('.', '')),
+        debut: d,
+        fin: ajouterJours(d, 1),
+      });
+    }
+    return {
+      type,
+      debut,
+      fin,
+      libelle: `Semaine ${numeroSemaine(debut)} — du ${fJourMois.format(debut)} au ${fJourLong.format(dernier)}`,
+      precedente: { debut: ajouterJours(debut, -7), fin: debut },
+      colonne: 'Jour',
+      sousIntervalles: sous,
+    };
+  }
+
+  if (type === 'mois') {
+    const debut = new Date(jour.getFullYear(), jour.getMonth(), 1);
+    const fin = new Date(jour.getFullYear(), jour.getMonth() + 1, 1);
+    const sous: SousIntervalle[] = [];
+    for (let d = debut; d < fin; d = ajouterJours(d, 1)) {
+      sous.push({ libelle: fJour.format(d), debut: d, fin: ajouterJours(d, 1) });
+    }
+    return {
+      type,
+      debut,
+      fin,
+      libelle: premiereMajuscule(fMoisLong.format(debut)),
+      precedente: { debut: new Date(debut.getFullYear(), debut.getMonth() - 1, 1), fin: debut },
+      colonne: 'Jour',
+      sousIntervalles: sous,
+    };
+  }
+
+  if (type === 'trimestre') {
+    const trimestre = Math.floor(jour.getMonth() / 3);
+    const debut = new Date(jour.getFullYear(), trimestre * 3, 1);
+    const fin = new Date(jour.getFullYear(), trimestre * 3 + 3, 1);
+    const dernierMois = new Date(jour.getFullYear(), trimestre * 3 + 2, 1);
+    return {
+      type,
+      debut,
+      fin,
+      libelle: `Trimestre ${trimestre + 1} ${debut.getFullYear()} — ${fMoisSeul.format(debut)} a ${fMoisSeul.format(dernierMois)}`,
+      precedente: { debut: new Date(debut.getFullYear(), debut.getMonth() - 3, 1), fin: debut },
+      colonne: 'Mois',
+      sousIntervalles: sousIntervallesParMois(debut.getFullYear(), trimestre * 3, 3),
+    };
+  }
+
+  const debut = new Date(jour.getFullYear(), 0, 1);
+  return {
+    type,
+    debut,
+    fin: new Date(jour.getFullYear() + 1, 0, 1),
+    libelle: `Annee ${debut.getFullYear()}`,
+    precedente: { debut: new Date(debut.getFullYear() - 1, 0, 1), fin: debut },
+    colonne: 'Mois',
+    sousIntervalles: sousIntervallesParMois(debut.getFullYear(), 0, 12),
+  };
+}
+
+/** Compte les affiches Electro / Nouvelles technologies creees dans [debut, fin[. */
+export function compterAffiches(
+  affiches: readonly AfficheResume[],
+  debut: Date,
+  fin: Date,
+): { electro: number; nt: number; total: number } {
+  const d = debut.getTime();
+  const f = fin.getTime();
+  let electro = 0;
+  let nt = 0;
+  for (const a of affiches) {
+    if (!a.gabarit) continue;
+    const t = a.date.getTime();
+    if (t < d || t >= f) continue;
+    if (a.gabarit === 'electro') electro += 1;
+    else nt += 1;
+  }
+  return { electro, nt, total: electro + nt };
 }
